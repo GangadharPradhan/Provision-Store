@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./fab5.css" />
+    <title>Fab 5 live session activity</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@16/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/babel-standalone@6.26.0/babel.js"
+    ></script>
+    <script type="text/babel">
+      const root = document.getElementById("root");
+      const { useState } = React;
+      //header componet
+      const HeaderComponet = (props) => {
+        const currentDate = new Date();
+        const day = currentDate.getDate();
+        const month = currentDate.getMonth() + 1;
+        const year = currentDate.getFullYear();
+
+        return (
+          <div className="header">
+            <h1>Raja Provision Store</h1>
+            <h2>{`${day}/ ${month} / ${year}`}</h2>
+          </div>
+        );
+      };
+      //search componet
+
+      const SearchComponet = (props) => {
+        return (
+          <div>
+            <input
+              type="text"
+              value={props.currentvalue}
+              className="search"
+              placeholder="search item by name/code"
+              onChange={props.getdata}
+            />
+          </div>
+        );
+      };
+      //ListOfCartItem componet
+      const ListOfCartItem = (props) => {
+        const { datalist, cartdata } = props;
+        //console.log(datacart);
+        return (
+          <div>
+            {datalist.length > 0 && (
+              <table className="listofcart" border="1">
+                <thead>
+                  <tr>
+                    <td>Name</td>
+                    <td>Price</td>
+                    <td>Action</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {datalist.map((val) => {
+                    return (
+                      <tr key={val.id}>
+                        <td>{val.name}</td>
+                        <td>{val.price}</td>
+                        <td>
+                          <button
+                            onClick={() => {
+                              cartdata(val.id);
+                            }}
+                          >
+                            Add
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        );
+      };
+      //Cartitems componet
+      const Cartitems = (props) => {
+        const { cartlist, remove, add, removeItem, printpage,createNewbill } = props;
+        let count = 1;
+       //console.log(cartlist)
+        return (
+          <div>
+            {cartlist.length > 0 && (
+              <div>
+                <table>
+                  <thead>
+                    <tr>
+                      <td>#</td>
+                      <td>Name</td>
+                      <td>price</td>
+                      <td>quantity</td>
+                      <td>total</td>
+                      <td>action</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cartlist.map((val, i) => {
+                      return (
+                        <tr key={i}>
+                          <td>{count++}</td>
+                          <td>{val.name}</td>
+                          <td>{val.price}</td>
+                          <td>
+                            <button
+                              onClick={() => {
+                                remove(val.id);
+                              }}
+                              disabled={val.quantity == 1}
+                            >
+                              -
+                            </button>{" "}
+                            {val.quantity}{" "}
+                            <button
+                              onClick={() => {
+                                add(val.id);
+                              }}
+                            >
+                              +
+                            </button>
+                          </td>
+                          <td>{val.price * val.quantity}</td>
+                          <td>
+                            <button
+                              onClick={() => {
+                                removeItem(val.id);
+                              }}
+                            >
+                              remove
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <button onClick={()=>{printpage()}}>print</button>
+                <button onClick={()=>{createNewbill()}}>recreate</button>
+              </div>
+            )}
+          </div>
+        );
+      };
+      //total componet
+      const Totalcomponet = (props) => {
+       const {cartlist} = props;
+        let total=0;
+        cartlist.forEach(val=>{
+          total = total + (val.quantity * val.price)
+        })
+        return(<div style={{float:'right',marginRight:'100px'}}>
+        <h2>total: {total}.00</h2>
+        </div>)
+      }
+      const ProvisionStore = () => {
+        const data = [
+          { id: 101, name: "Rice - Raw Sona Masuri", price: 54, quantity: 1 },
+          {
+            id: 104,
+            name: "Rice - Raw Sona Masuri - super premium",
+            price: 58,
+            quantity: 1,
+          },
+          { id: 105, name: "Poha thick", price: 48, quantity: 1 },
+          { id: 110, name: "Poha Medium", price: 55, quantity: 1 },
+          { id: 111, name: "Organic Sona Masuri Rice", price: 69, quantity: 1 },
+        ];
+        const [inputVal, setInputval] = useState("");
+        const [itemList, setItemlist] = useState([]);
+        const [cart, setcart] = useState([]);
+        const quantity = 0;
+        const getvalue = (event) => {
+          const inval = event.target.value;
+          setInputval(inval);
+          const filterValue = data.filter((val) => {
+            return val.name.toLowerCase().includes(inval.toLowerCase());
+          });
+          setItemlist(filterValue); //filter the data based on user search
+          if (inval.length == 0) {
+            //when input field empty it show nothing
+            setItemlist([]);
+          }
+        };
+        const Add = (id) => {
+          const check = cart.every((item) => {
+            //code for add item
+            return item.id !== id;
+          });
+          if (check) {
+            const cartData = itemList.filter((el) => {
+              return el.id === id;
+            });
+            //console.log(cartData);
+            setcart([...cart, ...cartData]);
+          } else {
+            alert("The product has been added to cart.");
+            const check_index = cart.findIndex((item) => item.id === id);
+            if (check_index !== -1) {
+              cart[check_index].quantity++;
+              console.log("Quantity updated:", cart);
+            }
+          }
+
+          setInputval(""); // after the add item to cart input field should empty
+          setItemlist([]); // when user go to the cart page the list pase show nothing
+          //console.log(cart);
+        };
+
+        const addData = (id) => {
+          // quantity increse when user click the + btn
+          const newdata = cart.map((val) => {
+            if (val.id === id) {
+              return { ...val, ...{ quantity: val.quantity + 1 } };
+            } else {
+              return { ...val };
+            }
+          });
+          setcart(newdata);
+        };
+        const removeData = (id) => {
+          //// quantity decrese when user click the - btn
+          const newdata = cart.map((val) => {
+            if (val.id === id) {
+              return { ...val, ...{ quantity: val.quantity - 1 } };
+            } else {
+              return { ...val };
+            }
+          });
+          setcart(newdata);
+        };
+        const removeCartData = (id) => {
+          //item remove when user click the remove button
+          const filtervalue = cart.filter((val) => {
+            return val.id !== id;
+          });
+          setcart(filtervalue);
+        };
+         const printdata =()=>{
+           window.print()
+         }
+         const newbill = () =>{
+           setcart([]);
+         }
+        return (
+          <div>
+            <HeaderComponet />
+            <SearchComponet currentvalue={inputVal} getdata={getvalue} />
+            <ListOfCartItem datalist={itemList} cartdata={Add} />
+            {cart.length > 0 && (
+              <Cartitems
+                cartlist={cart}
+                remove={removeData}
+                add={addData}
+                removeItem={removeCartData}
+                printpage={printdata}
+                createNewbill={newbill}
+              />
+            )}
+           { cart.length > 0 && (<Totalcomponet  cartlist={cart}/>)}
+          </div>
+        );
+      };
+
+      ReactDOM.render(<ProvisionStore />, root);
+    </script>
+  </body>
+</html>
